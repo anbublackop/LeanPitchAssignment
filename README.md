@@ -1,0 +1,2 @@
+# LeanPitchAssignment
+Training module assignment
