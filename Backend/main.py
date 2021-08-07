@@ -53,17 +53,20 @@ class Module(db.Model):
     name = db.Column(db.String(100), unique = True)
     course_id = db.Column(db.Integer, db.ForeignKey('course.id'))
     state = db.Column(db.String(20))
- 
-    def __init__(self, name, course_id, state="Draft"):
+    publishedId = db.Column(db.Integer)
+
+    def __init__(self, name, course_id, state="Draft", published_id=None):
         self.name = name
         self.course_id = course_id
         self.state = state
+        self.publishedId = published_id
     
     def serialize(self):
         return {
             'name': self.name, 
             'course_id': self.course_id,
             'state': self.state,
+            'published_id': self.publishedId
         }
 
 class Topic(db.Model):
@@ -72,19 +75,22 @@ class Topic(db.Model):
     module_id = db.Column(db.Integer, db.ForeignKey('module.id') )
     description = db.Column(db.String(200))
     state = db.Column(db.String(20))
+    publishedId = db.Column(db.Integer)
 
-    def __init__(self, name, module_id, description, state="Draft"):
+    def __init__(self, name, module_id, description, state="Draft", published_id=None):
         self.name = name
         self.module_id = module_id
         self.description = description
         self.state = state
-    
+        self.publishedId = published_id
+
     def serialize(self):
         return {
             'name': self.name, 
             'module_id': self.module_id,
             'description': self.description,
             'state': self.state,
+            'published_id': self.publishedId
         }
 
 @app.route('/')
@@ -107,8 +113,7 @@ def addTrainer():
 def addCourse():
     name = request.values.get('name')
     code = request.values.get('code')
-    state = request.values.get('state') 
-    course = Course(name, code, state)
+    course = Course(name, code, "Published")
     addToDB(course)
     return "Added new course successfully!"
 
@@ -116,7 +121,7 @@ def addCourse():
 def addModule():
     name = request.values.get('name')
     course_id = request.values.get('course_id')
-    module = Module(name, course_id)
+    module = Module(name, course_id, "Published")
     addToDB(module)
     return "Added new module successfully!"
 
@@ -125,7 +130,7 @@ def addTopic():
     name = request.values.get('name')
     module_id = request.values.get('module_id')
     description = request.values.get('description')
-    topic = Topic(name, module_id, description)
+    topic = Topic(name, module_id, description, "Published")
     addToDB(topic)
     return "Added new topic successfully!"
 
@@ -163,9 +168,28 @@ def updateCourse():
 def updateModule():
     name = request.values.get('name')
     new_name = request.values.get('new_name')
-    module = Module.query.filter_by(name=name).first()
-    module.name = new_name
-    db.session.commit()
+    state = request.values.get('state')
+    getModule = Module.query.filter_by(name=name).first()
+    if (state == "Draft"):
+        draftModule = Module.query.filter_by(name=name, state=state).first()
+        publishedModule = Module.query.filter_by(name=name).first()
+        if (draftModule):
+            draftModule.name = new_name
+            db.session.commit()
+        else:
+            module = Module(new_name, getModule.course_id, state, publishedModule.id)
+            addToDB(module)
+    else:
+        module = Module.query.filter_by(name=name, state="Draft").first()
+        if (module):
+            published_module_id = module.publishedId
+            db.session.delete(module)
+            module = Module.query.filter_by(id=published_module_id).first()
+        else:
+            module = Module.query.filter_by(name=name).first()
+        module.name = new_name
+        module.state = state
+        db.session.commit()
     return "Updated module successfully!"
 
 @app.route('/update-topic', methods=['POST'])
@@ -173,10 +197,31 @@ def updateTopic():
     name = request.values.get('name')
     new_name = request.values.get('new_name')
     description = request.values.get('description')
-    topic = Topic.query.filter_by(name=name).first()
-    topic.name = new_name
-    topic.description = description
-    db.session.commit()
+    state = request.values.get('state')
+    getTopic = Topic.query.filter_by(name=name).first()
+    if (state == "Draft"):
+        draftTopic = Topic.query.filter_by(name=name, state=state).first()
+        publishedTopic = Topic.query.filter_by(name=name).first()
+        if (draftTopic):
+            draftTopic.name = new_name
+            draftTopic.description = description
+            db.session.commit()
+        else:
+            topic = Topic(new_name, getTopic.module_id, description, state, publishedTopic.id)
+            addToDB(topic)
+    else:
+        topic = Topic.query.filter_by(name=name, state="Draft").first()
+        if (topic):
+            published_topic_id = topic.publishedId
+            db.session.delete(topic)
+            topic = Topic.query.filter_by(id=published_topic_id).first()
+        else:
+            topic = Topic.query.filter_by(name=name).first()
+        topic.name = new_name
+        topic.description = description
+        topic.state = state
+        db.session.commit()
+    
     return "Updated topic successfully!"
 
 @app.route('/get-courses', methods=['GET'])
