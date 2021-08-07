@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  backend:
+    restart: always
+    build:
+      context: .
+    ports:
+      - 5001:5000
+    volumes:
+      - ./:/app
+    links:
+      - mysqldb
+
+  mysqldb:
+    image: mysql
+    ports:
+      - 3308:3306
+    user: root
+    environment:
+      - MYSQL_ROOT_PASSWORD=tiger
+    volumes:
+      - mysql:/var/lib/mysql
+      - mysql_config:/etc/mysql
+      - ./init.sql:/data/application/init.sql
+    command: --init-file /data/application/init.sql
+
+volumes:
+  mysql:
+  mysql_config:
