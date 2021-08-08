@@ -10,6 +10,7 @@ import EditBox from './EditBox';
 import Grid from '@material-ui/core/Grid';
 import CreateBox from './CreateBox';
 import { Link } from "react-router-dom";
+import { Icon, Button } from '@material-ui/core';
 
 function Courses() {
 
@@ -34,9 +35,14 @@ function Courses() {
 
     const classes = useStyles();
     const [courses, setCourses] = React.useState([]);
+    const [editCourseData, setEditCourseData] = React.useState({
+        name: '',
+        code: '',
+        course: null
+    });
 
     const getCourses = async () => {
-        var result = await axios.get(process.env.REACT_APP_BACKEND_ADDRESS + 'get-courses')
+        var result = await axios.get(process.env.REACT_APP_BACKEND_ADDRESS + 'get-published-courses')
         if (result && result.data && result.data.list_of_courses) {
             result.data.list_of_courses.forEach((course) => {
                 course.openCourse = false
@@ -44,7 +50,39 @@ function Courses() {
             setCourses(result.data.list_of_courses)
         }
     }
+    
+    const handleClickEditCourse = async (course) => {
+        
+        const draftVersion = await axios.get(process.env.REACT_APP_BACKEND_ADDRESS + 'get-draft-if-any', {
+            params: {
+                type: 'course',
+                id: course.id
+            }
+        })
+        if (Object.keys(draftVersion.data).length) {
+            const draftData = {
+                name: draftVersion.data.name,
+                code: draftVersion.data.code,
+                course: course
+            }
+            setEditCourseData(draftData)
+        } else {
+            setEditCourseData({
+                name: '',
+                code: '',
+                course: course
+            })
+        }
+    }
 
+    const handleClickDeleteCourse = async (course) => {
+        await axios.delete(process.env.REACT_APP_BACKEND_ADDRESS + 'delete-entity', {
+            params: {
+                type: 'course',
+                id: course.id
+            }
+        })
+    }
 
     useEffect(() => {
         getCourses()
@@ -68,19 +106,25 @@ function Courses() {
                 >
                     {courses && courses.map((course, index) => {
                         return <React.Fragment key={index}>
-                            <ListItem button>
-                                <Link to={{
-                                    pathname: '/module',
-                                    state: {props: "state"}
-                                }}
-                                >{course.name}</Link>
-                            </ListItem>
+                            <Grid item xs={6}>
+                                <ListItem button>
+                                    <Link to={{
+                                        pathname: '/module',
+                                        state: { props: "state" }
+                                    }}
+                                    >{course.name}</Link>
+                                </ListItem>
+                            </Grid>
+                            <Grid item xs={6}>
+                                <Button onClick={() => handleClickEditCourse(course)}>Edit</Button>
+                                <Button onClick={() => handleClickDeleteCourse(course)}>Delete</Button>
+                            </Grid>
                         </React.Fragment>
                     })}
                 </List>
             </Grid>
             <Grid item xs={6} className={classes.paper}>
-                <EditBox />
+                <EditBox data={editCourseData}/>
             </Grid>
         </Grid >
     );

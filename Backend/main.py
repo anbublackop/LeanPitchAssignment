@@ -42,6 +42,7 @@ class Course(db.Model):
     
     def serialize(self):
         return {
+            'id': self.id,
             'name': self.name, 
             'code': self.code,
             'state': self.state,
@@ -63,6 +64,7 @@ class Module(db.Model):
     
     def serialize(self):
         return {
+            'id': self.id,
             'name': self.name, 
             'course_id': self.course_id,
             'state': self.state,
@@ -86,6 +88,7 @@ class Topic(db.Model):
 
     def serialize(self):
         return {
+            'id': self.id,
             'name': self.name, 
             'module_id': self.module_id,
             'description': self.description,
@@ -183,7 +186,7 @@ def updateCourse():
         course.code = new_code
         course.state = state
         db.session.commit()
-    return "Updated course successfully!"
+    return build_actual_response(jsonify({"message":"Updated course successfully!"}))
     
 @app.route('/update-module', methods=['OPTIONS','POST'])
 def updateModule():
@@ -211,7 +214,7 @@ def updateModule():
         module.name = new_name
         module.state = state
         db.session.commit()
-    return "Updated module successfully!"
+    return build_actual_response(jsonify({"message":"Updated module successfully!"}))
 
 @app.route('/update-topic', methods=['OPTIONS','POST'])
 def updateTopic():
@@ -242,30 +245,69 @@ def updateTopic():
         topic.description = description
         topic.state = state
         db.session.commit()
-    
-    return "Updated topic successfully!"
+    return build_actual_response(jsonify({"message": "Updated topic successfully!"}))
 
-@app.route('/get-courses', methods=['GET'])
-@cross_origin()
+@app.route('/get-published-courses', methods=['GET'])
 def getCourses():
-    courses = Course.query.all()
-    return jsonify(list_of_courses=[e.serialize() for e in courses])
+    courses = Course.query.filter_by(state="Published").all()
+    return build_actual_response(jsonify(list_of_courses=[e.serialize() for e in courses]))
 
 @app.route('/get-modules-by-course', methods=['GET'])
-@cross_origin()
 def getModulesByCourseName():
     course_name = request.args.get('course_name')
     course = Course.query.filter_by(name=course_name).first()
-    modules = Module.query.filter_by(course_id=course.id).all()
-    return jsonify(list_of_modules=[e.serialize() for e in modules])
+    modules = Module.query.filter_by(course_id=course.id, state="Published").all()
+    return build_actual_response(jsonify(list_of_modules=[e.serialize() for e in modules]))
 
 @app.route('/get-topics-by-module', methods=['GET'])
-@cross_origin()
 def getTopicsByModuleName():
     module_name = request.args.get('module_name')
     module = Module.query.filter_by(name=module_name).first()
-    topics = Topic.query.filter_by(module_id=module.id).all()
-    return jsonify(list_of_topics=[e.serialize() for e in topics])
+    topics = Topic.query.filter_by(module_id=module.id, state="Published").all()
+    return build_actual_response(jsonify(list_of_topics=[e.serialize() for e in topics]))
+
+@app.route('/delete-entity', methods=['DELETE'])
+def deleteCourseById():
+    entity_type = request.args.get('type')
+    id = request.args.get('id')
+    if(entity_type == "course"):
+        course = Course.query.filter_by(id=id).first()
+        db.session.delete(course)
+        db.session.commit()
+        return build_actual_response(jsonify({"message": "Course Deleted Successfully!"}))
+    elif(entity_type == "module"):
+        module = Module.query.filter_by(id=id).first()
+        db.session.delete(module)
+        db.session.commit()
+        return build_actual_response(jsonify({"message": "Module Deleted Successfully!"}))
+    else:
+        topic = Topic.query.filter_by(id=id).first()
+        db.session.delete(topic)
+        db.session.commit()
+        return build_actual_response(jsonify({"message": "Topic Deleted Successfully!"}))
+
+@app.route('/get-draft-if-any', methods=['OPTIONS','GET'])
+def getDraftIfAny():
+    if request.method == 'OPTIONS': 
+        return build_preflight_response()
+    elif request.method == 'GET':
+        type = request.args.get('type')
+        id = request.args.get('id')
+        if(type == "course"):
+            course = Course.query.filter_by(publishedId=id).first()
+            if (course):
+                return build_actual_response(jsonify(course.serialize()))
+            return {}
+        elif(type == "module"):
+            module = Module.query.filter_by(publishedId=id).first()
+            if (module):
+                return build_actual_response(jsonify(module.serialize()))
+            return {}
+        else:
+            topic = Topic.query.filter_by(publishedId=id).first()
+            if (topic):
+                return build_actual_response(jsonify(topic.serialize()))
+            return {}
 
 def addToDB(entity):
     db.session.add(entity)
