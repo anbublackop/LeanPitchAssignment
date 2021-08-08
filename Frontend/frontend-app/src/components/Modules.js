@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useHistory } from 'react'
 import '../App.css';
 import { makeStyles } from '@material-ui/core/styles';
 import ListSubheader from '@material-ui/core/ListSubheader';
@@ -7,7 +7,7 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import axios from 'axios';
 
-function Courses() {
+function Modules(props) {
 
     const useStyles = makeStyles((theme) => ({
         root: {
@@ -24,42 +24,41 @@ function Courses() {
     const [modules, setModules] = React.useState([]);
 
     const getTopicsByModule = async (module) => {
-        var result = await axios.get(process.env.REACT_APP_BACKEND_ADDRESS + 'get-topics-by-module', {
+        var result = await axios.get(process.env.REACT_APP_BACKEND_ADDRESS + 'get-modules-by-course', {
             params: {
                 module_name: module
             }
         })
-        setCourses(result.data.list_of_modules)
+        setModules(result.data.list_of_modules)
     }
 
     useEffect(() => {
-        getCourses()
+        // getCourses()
     }, []);
-
+    
     return (
-
-        <List
-            component="nav"
-            aria-labelledby="nested-list-subheader"
-            subheader={
-                <ListSubheader component="div" id="nested-list-subheader">
-                    Courses
-                </ListSubheader>
-            }
-            className={classes.root}
-        >
-            {courses && courses.map((course, index) => {
-                return <React.Fragment key={index}>
-                    <ListItem button onClick={() => handleClickCourse(course)}>
-                        <ListItemText primary={course.name} />
-                    </ListItem>
-                </React.Fragment>
-            })}
-
-
-
-        </List>
+        <>
+        Hello World
+        </>   
+        // <List
+        //     component="nav"
+        //     aria-labelledby="nested-list-subheader"
+        //     subheader={
+        //         <ListSubheader component="div" id="nested-list-subheader">
+        //             Modules
+        //         </ListSubheader>
+        //     }
+        //     className={classes.root}
+        // >
+        //     {modules && modules.map((module, index) => {
+        //         return <React.Fragment key={index}>
+        //             <ListItem button onClick={() => handleClickCourse(module)}>
+        //                 <ListItemText primary={course.name} />
+        //             </ListItem>
+        //         </React.Fragment>
+        //     })}
+        // </List>
     );
 }
 
-export default Courses;
+export default Modules;

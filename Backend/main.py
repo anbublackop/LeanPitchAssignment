@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_cors import CORS, cross_origin
@@ -93,6 +93,17 @@ class Topic(db.Model):
             'published_id': self.publishedId
         }
 
+def build_preflight_response():
+    response = make_response()
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add('Access-Control-Allow-Headers', "*")
+    response.headers.add('Access-Control-Allow-Methods', "*")
+    return response
+
+def build_actual_response(response):
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    return response
+
 @app.route('/')
 def hello():
     return "Welcome to the training Portal"
@@ -101,7 +112,7 @@ def hello():
 def create_tables():
     db.create_all()
 
-@app.route('/add-trainer', methods=['POST'])
+@app.route('/add-trainer', methods=['OPTIONS','POST'])
 def addTrainer():
     username = request.values.get('username')
     full_name = request.values.get('full_name')
@@ -109,32 +120,42 @@ def addTrainer():
     addToDB(trainer)
     return "Added new trainer successfully!"
 
-@app.route('/add-course', methods=['POST'])
+@app.route('/add-course', methods=['OPTIONS','POST'])
 def addCourse():
-    name = request.values.get('name')
-    code = request.values.get('code')
-    course = Course(name, code, "Published")
-    addToDB(course)
-    return "Added new course successfully!"
+    if request.method == 'OPTIONS': 
+        return build_preflight_response()
+    elif request.method == 'POST':
+        name = request.values.get('name')
+        code = request.values.get('code')
+        course = Course(name, code, "Published")
+        addToDB(course)
+        return build_actual_response(jsonify({ 'message': 'Added new course successfully!' }))
 
-@app.route('/add-module', methods=['POST'])
+@app.route('/add-module', methods=['OPTIONS','POST'])
 def addModule():
-    name = request.values.get('name')
-    course_id = request.values.get('course_id')
-    module = Module(name, course_id, "Published")
-    addToDB(module)
-    return "Added new module successfully!"
+    if request.method == 'OPTIONS': 
+        return build_preflight_response()
+    elif request.method == 'POST':
+        name = request.values.get('name')
+        course_id = request.values.get('course_id')
+        module = Module(name, course_id, "Published")
+        addToDB(module)
+        return build_actual_response(jsonify({ 'message': 'Added new module successfully!' }))
 
-@app.route('/add-topic', methods=['POST'])
+@app.route('/add-topic', methods=['OPTIONS','POST'])
 def addTopic():
-    name = request.values.get('name')
-    module_id = request.values.get('module_id')
-    description = request.values.get('description')
-    topic = Topic(name, module_id, description, "Published")
-    addToDB(topic)
-    return "Added new topic successfully!"
+    if request.method == 'OPTIONS': 
+        return build_preflight_response()
+    elif request.method == 'POST':
+        name = request.values.get('name')
+        module_id = request.values.get('module_id')
+        description = request.values.get('description')
+        topic = Topic(name, module_id, description, "Published")
+        addToDB(topic)
+        return build_actual_response(jsonify({ 'message': 'Added new topic successfully!' }))
+    
 
-@app.route('/update-course', methods=['POST'])
+@app.route('/update-course', methods=['OPTIONS','POST'])
 def updateCourse():
     name = request.values.get('name')
     new_code = request.values.get('new_code')
@@ -164,7 +185,7 @@ def updateCourse():
         db.session.commit()
     return "Updated course successfully!"
     
-@app.route('/update-module', methods=['POST'])
+@app.route('/update-module', methods=['OPTIONS','POST'])
 def updateModule():
     name = request.values.get('name')
     new_name = request.values.get('new_name')
@@ -192,7 +213,7 @@ def updateModule():
         db.session.commit()
     return "Updated module successfully!"
 
-@app.route('/update-topic', methods=['POST'])
+@app.route('/update-topic', methods=['OPTIONS','POST'])
 def updateTopic():
     name = request.values.get('name')
     new_name = request.values.get('new_name')

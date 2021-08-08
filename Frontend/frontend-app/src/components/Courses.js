@@ -8,6 +8,8 @@ import ListItemText from '@material-ui/core/ListItemText';
 import axios from 'axios';
 import EditBox from './EditBox';
 import Grid from '@material-ui/core/Grid';
+import CreateBox from './CreateBox';
+import { Link } from "react-router-dom";
 
 function Courses() {
 
@@ -19,7 +21,7 @@ function Courses() {
         },
         gridStyle: {
             flexGrow: 1,
-          },
+        },
         nested: {
             paddingLeft: theme.spacing(4),
         },
@@ -43,9 +45,6 @@ function Courses() {
         }
     }
 
-    const handleClickCourse = async (course) => {
-        // await getModulesByCourse(course.name)
-    };
 
     useEffect(() => {
         getCourses()
@@ -53,6 +52,9 @@ function Courses() {
 
     return (
         <Grid container className={classes.gridStyle} spacing={2}>
+            <Grid item xs={12} className={classes.paper}>
+                <CreateBox type={"Course"} />
+            </Grid>
             <Grid item xs={6} className={classes.paper}>
                 <List
                     component="nav"
@@ -66,8 +68,12 @@ function Courses() {
                 >
                     {courses && courses.map((course, index) => {
                         return <React.Fragment key={index}>
-                            <ListItem button onClick={() => handleClickCourse(course)}>
-                                <ListItemText primary={course.name} />
+                            <ListItem button>
+                                <Link to={{
+                                    pathname: '/module',
+                                    state: {props: "state"}
+                                }}
+                                >{course.name}</Link>
                             </ListItem>
                         </React.Fragment>
                     })}
