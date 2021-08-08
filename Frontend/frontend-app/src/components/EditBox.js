@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { makeStyles } from '@material-ui/core/styles'
 import TextField from '@material-ui/core/TextField'
 import Button from '@material-ui/core/Button'
@@ -9,8 +9,9 @@ import '../App.css';
 
 function EditBox(props) {
 
-    let boxType = "Course"
-    
+    const { type } = props.data
+    let boxType = type
+
     const useStyles = makeStyles((theme) => ({
         root: {
             '& .MuiTextField-root': {
@@ -25,18 +26,30 @@ function EditBox(props) {
         },
     }));
 
+    useEffect(() => {
+        switch (type) {
+            case "Course":
+                setCourseName(props.data.editCourseData.name)
+                setCourseCode(props.data.editCourseData.code)
+                break;
+            case "Module":
+                setModuleName(props.data.editModuleData.name)
+                break;
+            case "Topic":
+                setTopicName(props.data.editTopicData.name)
+                setDescription(props.data.editTopicData.description)
+                break;
+        }
+    }, [props]);
+
     const classes = useStyles();
-    const [courseName, setCourseName] = React.useState(props.data.name);
-    const [courseCode, setCourseCode] = React.useState(props.data.code);
+    const [courseName, setCourseName] = React.useState('');
+    const [courseCode, setCourseCode] = React.useState('');
     const [moduleName, setModuleName] = React.useState('');
-    const [moduleCourseId, setModuleCourseId] = React.useState(0);
     const [topicName, setTopicName] = React.useState('');
-    const [topicModuleId, setTopicModuleId] = React.useState('');
     const [description, setDescription] = React.useState('');
     const [apiResponse, setAPIResponse] = React.useState('');
-    
-    console.log("props inside edit box module", props)
-    
+
     const saveCourseAsDraft = async () => {
 
         var bodyFormData = new FormData();
@@ -46,7 +59,7 @@ function EditBox(props) {
         bodyFormData.append('state', "Draft");
 
         const response = await axios.post(process.env.REACT_APP_BACKEND_ADDRESS + '/update-course', bodyFormData)
-        
+
         if (response.status == 200) {
             setAPIResponse(response.data.message)
         } else {
@@ -55,11 +68,11 @@ function EditBox(props) {
     }
 
     const saveModuleAsDraft = () => {
-        
+
     }
 
     const saveTopicAsDraft = () => {
-        
+
     }
 
     const publishCourse = () => {
@@ -80,8 +93,8 @@ function EditBox(props) {
                 {boxType == "Course" ?
                     <>
                         <Grid item xs={12} className={classes.paper}>
-                            <TextField id="outlined-basic" label="Course Name" value={props.data.name} />
-                            <TextField id="outlined-basic" label="Course Code" value={props.data.code} />
+                            <TextField id="outlined-basic" label="Course Name" value={courseName} />
+                            <TextField id="outlined-basic" label="Course Code" value={courseCode} />
                         </Grid>
                         <Grid item xs={12} className={classes.paper}>
                             <Button id="publish-button" variant="contained" color="primary" onClick={() => publishCourse()}>Publish Course</Button>
@@ -91,7 +104,7 @@ function EditBox(props) {
                     (boxType == "Module" ?
                         <>
                             <Grid item xs={12} className={classes.paper}>
-                                <TextField id="outlined-basic" label="Module Name" variant="outlined" />
+                                <TextField id="outlined-basic" label="Module Name" variant="outlined" value={moduleName} />
                             </Grid>
                             <Grid item xs={12} className={classes.paper}>
                                 <Button id="publish-button" variant="contained" color="primary" onClick={() => publishModule()}>Publish Module</Button>
@@ -100,8 +113,8 @@ function EditBox(props) {
                         :
                         <>
                             <Grid item xs={12} className={classes.paper}>
-                                <TextField id="outlined-basic" label="Topic Name" variant="outlined" />
-                                <TextField id="outlined-basic" label="Description" variant="outlined" />
+                                <TextField id="outlined-basic" label="Topic Name" variant="outlined" value={topicName}/>
+                                <TextField id="outlined-basic" label="Description" variant="outlined"  value={description}/>
                             </Grid>
                             <Grid item xs={12} className={classes.paper}>
                                 <Button id="publish-button" variant="contained" color="primary" onClick={() => publishTopic()}>Publish Topic</Button>

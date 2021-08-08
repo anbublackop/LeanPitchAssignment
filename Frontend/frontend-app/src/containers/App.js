@@ -1,15 +1,12 @@
 
 import React from 'react'
 import '../App.css';
-import Courses from '../components/Courses';
-import Modules from '../components/Modules';
-import Topics from '../components/Topics';
 import {
     BrowserRouter as Router,
     Switch,
-    Route,
-    Link
+    Route
 } from "react-router-dom";
+import Listing from '../components/Listing';
 
 function App() {
     return (
@@ -17,13 +14,7 @@ function App() {
             <div className="App">
                 <Switch>
                     <Route exact path="/">
-                        <Courses />
-                    </Route>
-                    <Route path="/module">
-                        <Modules />
-                    </Route>
-                    <Route path="/topic">
-                        <Topics />
+                        <Listing />
                     </Route>
                 </Switch>
             </div>

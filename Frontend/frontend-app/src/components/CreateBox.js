@@ -9,7 +9,7 @@ import '../App.css';
 
 function CreateBox(props) {
 
-    let boxType = props.type;
+    let boxType = props.data.type;
 
     const useStyles = makeStyles((theme) => ({
         root: {
@@ -24,14 +24,14 @@ function CreateBox(props) {
             color: theme.palette.text.secondary,
         },
     }));
+    
+    const { entity_id } = props.data
 
     const classes = useStyles();
     const [courseName, setCourseName] = React.useState('');
     const [courseCode, setCourseCode] = React.useState('');
     const [moduleName, setModuleName] = React.useState('');
-    const [moduleCourseId, setModuleCourseId] = React.useState(0);
     const [topicName, setTopicName] = React.useState('');
-    const [topicModuleId, setTopicModuleId] = React.useState('');
     const [description, setDescription] = React.useState('');
     const [apiResponse, setAPIResponse] = React.useState('');
 
@@ -50,11 +50,11 @@ function CreateBox(props) {
         }
     }
 
-    const addModule = async (module_name, course_id) => {
+    const addModule = async (module_name) => {
         
         var bodyFormData = new FormData();
         bodyFormData.append('name', module_name);
-        bodyFormData.append('course_id', course_id);
+        bodyFormData.append('course_id', entity_id);
 
         const response = await axios.post(process.env.REACT_APP_BACKEND_ADDRESS + 'add-module', bodyFormData)
 
@@ -65,11 +65,10 @@ function CreateBox(props) {
         }
     }
 
-    const addTopic = async (topic_name, module_id, description) => {
-        
+    const addTopic = async (topic_name, description) => {
         var bodyFormData = new FormData();
         bodyFormData.append('name', topic_name);
-        bodyFormData.append('module_id', module_id);
+        bodyFormData.append('module_id', entity_id);
         bodyFormData.append('description', description);
 
         const response = await axios.post(process.env.REACT_APP_BACKEND_ADDRESS + 'add-topic', bodyFormData)
@@ -83,15 +82,15 @@ function CreateBox(props) {
 
     const handleCourseClick = async () => {
         await addCourse(courseName, courseCode)
-    };
+    }
 
     const handleModuleClick = async () => {
-        await addModule(moduleName, moduleCourseId)
-    };
+        await addModule(moduleName)
+    }
 
     const handleTopicClick = async () => {
-        await addTopic(topicName, topicModuleId, description)
-    };
+        await addTopic(topicName, description)
+    }
 
     return (
         <div className={classes.root}>
@@ -110,7 +109,7 @@ function CreateBox(props) {
                     (boxType == "Module" ?
                         <>
                             <Grid item xs={12} className={classes.paper}>
-                                <TextField id="outlined-basic" label="Module Name" variant="outlined" />
+                                <TextField id="outlined-basic" label="Module Name" variant="outlined" onChange={e => setModuleName(e.target.value)}/>
                             </Grid>
                             <Grid item xs={12} className={classes.paper}>
                                 <Button id="publish-button" variant="contained" color="primary" onClick={() => handleModuleClick()}>Add Module</Button>
@@ -119,8 +118,8 @@ function CreateBox(props) {
                         :
                         <>
                             <Grid item xs={12} className={classes.paper}>
-                                <TextField id="outlined-basic" label="Topic Name" variant="outlined" />
-                                <TextField id="outlined-basic" label="Description" variant="outlined" />
+                                <TextField id="outlined-basic" label="Topic Name" variant="outlined" onChange={e => setTopicName(e.target.value)}/>
+                                <TextField id="outlined-basic" label="Description" variant="outlined" onChange={e => setDescription(e.target.value)}/>
                             </Grid>
                             <Grid item xs={12} className={classes.paper}>
                                 <Button id="publish-button" variant="contained" color="primary" onClick={() => handleTopicClick()}>Add Topic</Button>
