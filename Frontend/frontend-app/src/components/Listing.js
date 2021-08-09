@@ -56,6 +56,7 @@ function Listing() {
     const [clickedModule, setClickedModule] = React.useState('')
     const [clickedTopic, setClickedTopic] = React.useState('')
     const [isOpen, setIsOpen] = React.useState(false);
+    const [apiResponse, setAPIResponse] = React.useState('');
 
     const togglePopup = () => {
         setIsOpen(!isOpen);
@@ -105,12 +106,17 @@ function Listing() {
     }
 
     const handleClickDeleteCourse = async (course) => {
-        await axios.delete(process.env.REACT_APP_BACKEND_ADDRESS + 'delete-entity', {
+        const response = await axios.delete(process.env.REACT_APP_BACKEND_ADDRESS + 'delete-entity', {
             params: {
                 type: 'course',
                 id: course.id
             }
         })
+        if (response.status == 200) {
+            setAPIResponse(response.data.message)
+        } else {
+            setAPIResponse("Failed to delete topic")
+        }
     }
 
     const getModulesByCourse = async (name) => {
@@ -147,12 +153,17 @@ function Listing() {
     }
 
     const handleClickDeleteModule = async (module) => {
-        await axios.delete(process.env.REACT_APP_BACKEND_ADDRESS + 'delete-entity', {
+        const response = await axios.delete(process.env.REACT_APP_BACKEND_ADDRESS + 'delete-entity', {
             params: {
                 type: 'module',
                 id: module.id
             }
         })
+        if (response.status == 200) {
+            setAPIResponse(response.data.message)
+        } else {
+            setAPIResponse("Failed to delete topic")
+        }
     }
 
     const getTopicsByModule = async (name) => {
@@ -190,12 +201,17 @@ function Listing() {
     }
 
     const handleClickDeleteTopic = async (topic) => {
-        await axios.delete(process.env.REACT_APP_BACKEND_ADDRESS + 'delete-entity', {
+        const response = await axios.delete(process.env.REACT_APP_BACKEND_ADDRESS + 'delete-entity', {
             params: {
                 type: 'topic',
                 id: topic.id
             }
         })
+        if (response.status == 200) {
+            setAPIResponse(response.data.message)
+        } else {
+            setAPIResponse("Failed to delete topic")
+        }
     }
 
     useEffect(() => {
@@ -213,6 +229,7 @@ function Listing() {
                             }} />
                         </Grid>
                         <Grid item xs={6} className={classes.paper}>
+                            <label>Courses</label>
                             <List>
                                 {courses && courses.map((course, index) => {
                                     return <React.Fragment key={index}>
@@ -236,6 +253,7 @@ function Listing() {
                                 handleClose={togglePopup} />
                             }
                         </Grid>
+                        {apiResponse}
                     </Grid >
                 ) : type == "module" ? (
                     <Grid container className={classes.gridStyle} spacing={2}>
@@ -246,6 +264,7 @@ function Listing() {
                             }} />
                         </Grid>
                         <Grid item xs={6} className={classes.paper}>
+                            <label>Modules</label>
                             <List>
                                 {modules && modules.map((module, index) => {
                                     return <React.Fragment key={index}>
@@ -263,12 +282,15 @@ function Listing() {
                             </List>
                         </Grid>
                         <Grid item xs={6} className={classes.paper}>
-                            <EditBox data={{
+                            {isOpen && <EditBox data={{
                                 type: "Module",
                                 editModuleData,
                                 clickedModule
-                            }} />
+                            }}
+                                handleClose={togglePopup} />
+                            }
                         </Grid>
+                        {apiResponse}
                     </Grid >
                 ) : (
                     <Grid container className={classes.gridStyle} spacing={2}>
@@ -279,6 +301,7 @@ function Listing() {
                             }} />
                         </Grid>
                         <Grid item xs={6} className={classes.paper}>
+                            <label>Topics</label>
                             <List>
                                 {topics && topics.map((topic, index) => {
                                     return <React.Fragment key={index}>
@@ -299,12 +322,15 @@ function Listing() {
                             </List>
                         </Grid>
                         <Grid item xs={6} className={classes.paper}>
-                            <EditBox data={{
+                            {isOpen && <EditBox data={{
                                 type: "Topic",
                                 editTopicData,
                                 clickedTopic
-                            }} />
+                            }}
+                                handleClose={togglePopup} />
+                            }
                         </Grid>
+                        {apiResponse}
                     </Grid >
                 )
             }
