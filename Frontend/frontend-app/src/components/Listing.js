@@ -54,6 +54,12 @@ function Listing() {
 
     const [clickedCourse, setClickedCourse] = React.useState('')
     const [clickedModule, setClickedModule] = React.useState('')
+    const [clickedTopic, setClickedTopic] = React.useState('')
+    const [isOpen, setIsOpen] = React.useState(false);
+
+    const togglePopup = () => {
+        setIsOpen(!isOpen);
+    }
 
     const getCourses = async () => {
         var result = await axios.get(process.env.REACT_APP_BACKEND_ADDRESS + 'get-published-courses')
@@ -75,7 +81,8 @@ function Listing() {
     }
 
     const handleClickEditCourse = async (course) => {
-
+        togglePopup()
+        setClickedCourse(course)
         const draftVersion = await axios.get(process.env.REACT_APP_BACKEND_ADDRESS + 'get-draft-if-any', {
             params: {
                 type: 'course',
@@ -118,7 +125,8 @@ function Listing() {
     }
 
     const handleClickEditModule = async (module) => {
-
+        togglePopup()
+        setClickedModule(module)
         const draftVersion = await axios.get(process.env.REACT_APP_BACKEND_ADDRESS + 'get-draft-if-any', {
             params: {
                 type: 'module',
@@ -159,7 +167,8 @@ function Listing() {
     }
 
     const handleClickEditTopic = async (topic) => {
-
+        togglePopup()
+        setClickedTopic(topic)
         const draftVersion = await axios.get(process.env.REACT_APP_BACKEND_ADDRESS + 'get-draft-if-any', {
             params: {
                 type: 'topic',
@@ -204,20 +213,11 @@ function Listing() {
                             }} />
                         </Grid>
                         <Grid item xs={6} className={classes.paper}>
-                            <List
-                                component="nav"
-                                aria-labelledby="nested-list-subheader"
-                                subheader={
-                                    <ListSubheader component="div" id="nested-list-subheader">
-                                        Courses
-                                    </ListSubheader>
-                                }
-                                className={classes.root}
-                            >
+                            <List>
                                 {courses && courses.map((course, index) => {
                                     return <React.Fragment key={index}>
                                         <Grid item xs={6}>
-                                            <ListItem button onClick={() => handleCourseClick(course)}>{course.name}</ListItem>
+                                            <ListItem button onClick={() => handleCourseClick(course)}>{course.name} ({course.code})</ListItem>
                                         </Grid>
                                         <Grid item xs={6}>
                                             <Button onClick={() => handleClickEditCourse(course)}>Edit</Button>
@@ -228,10 +228,13 @@ function Listing() {
                             </List>
                         </Grid>
                         <Grid item xs={6} className={classes.paper}>
-                            <EditBox data={{
+                            {isOpen && <EditBox data={{
                                 type: "Course",
-                                editCourseData
-                            }} />
+                                editCourseData,
+                                clickedCourse
+                            }}
+                                handleClose={togglePopup} />
+                            }
                         </Grid>
                     </Grid >
                 ) : type == "module" ? (
@@ -243,16 +246,7 @@ function Listing() {
                             }} />
                         </Grid>
                         <Grid item xs={6} className={classes.paper}>
-                            <List
-                                component="nav"
-                                aria-labelledby="nested-list-subheader"
-                                subheader={
-                                    <ListSubheader component="div" id="nested-list-subheader">
-                                        Modules
-                                    </ListSubheader>
-                                }
-                                className={classes.root}
-                            >
+                            <List>
                                 {modules && modules.map((module, index) => {
                                     return <React.Fragment key={index}>
                                         <Grid item xs={6}>
@@ -271,7 +265,8 @@ function Listing() {
                         <Grid item xs={6} className={classes.paper}>
                             <EditBox data={{
                                 type: "Module",
-                                editModuleData
+                                editModuleData,
+                                clickedModule
                             }} />
                         </Grid>
                     </Grid >
@@ -284,21 +279,15 @@ function Listing() {
                             }} />
                         </Grid>
                         <Grid item xs={6} className={classes.paper}>
-                            <List
-                                component="nav"
-                                aria-labelledby="nested-list-subheader"
-                                subheader={
-                                    <ListSubheader component="div" id="nested-list-subheader">
-                                        Topics
-                                    </ListSubheader>
-                                }
-                                className={classes.root}
-                            >
+                            <List>
                                 {topics && topics.map((topic, index) => {
                                     return <React.Fragment key={index}>
                                         <Grid item xs={6}>
-                                            <ListItem button>
+                                            <ListItem>
                                                 {topic.name}
+                                            </ListItem>
+                                            <ListItem>
+                                                {topic.description}
                                             </ListItem>
                                         </Grid>
                                         <Grid item xs={6}>
@@ -312,7 +301,8 @@ function Listing() {
                         <Grid item xs={6} className={classes.paper}>
                             <EditBox data={{
                                 type: "Topic",
-                                editTopicData
+                                editTopicData,
+                                clickedTopic
                             }} />
                         </Grid>
                     </Grid >

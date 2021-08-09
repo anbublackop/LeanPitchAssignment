@@ -4,7 +4,7 @@ import TextField from '@material-ui/core/TextField'
 import Button from '@material-ui/core/Button'
 import Grid from '@material-ui/core/Grid'
 import axios from 'axios'
-
+import debounce from 'lodash-es/debounce'
 import '../App.css';
 
 function EditBox(props) {
@@ -50,78 +50,127 @@ function EditBox(props) {
     const [description, setDescription] = React.useState('');
     const [apiResponse, setAPIResponse] = React.useState('');
 
-    const saveCourseAsDraft = async () => {
-
+    const updateCourse = async (state) => {
         var bodyFormData = new FormData();
-        bodyFormData.append('name', props.data.course.name)
+        bodyFormData.append('name', props.data.editCourseData.name || props.data.clickedCourse.name)
         bodyFormData.append('new_name', courseName);
         bodyFormData.append('new_code', courseCode);
-        bodyFormData.append('state', "Draft");
+        bodyFormData.append('state', state);
 
         const response = await axios.post(process.env.REACT_APP_BACKEND_ADDRESS + '/update-course', bodyFormData)
 
         if (response.status == 200) {
             setAPIResponse(response.data.message)
         } else {
-            setAPIResponse("Failed to add course")
+            setAPIResponse("Failed to update course")
         }
     }
 
-    const saveModuleAsDraft = () => {
+    const updateModule = async (state) => {
+        var bodyFormData = new FormData();
+        bodyFormData.append('name', props.data.editModuleData.name || props.data.clickedModule.name)
+        bodyFormData.append('new_name', moduleName);
+        bodyFormData.append('state', state);
 
+        const response = await axios.post(process.env.REACT_APP_BACKEND_ADDRESS + '/update-module', bodyFormData)
+
+        if (response.status == 200) {
+            setAPIResponse(response.data.message)
+        } else {
+            setAPIResponse("Failed to update module")
+        }
     }
 
-    const saveTopicAsDraft = () => {
+    const updateTopic = async (state) => {
+        var bodyFormData = new FormData();
+        bodyFormData.append('name', props.data.editTopicData.name || props.data.clickedTopic.name)
+        bodyFormData.append('new_name', topicName);
+        bodyFormData.append('description', description);
+        bodyFormData.append('state', state);
 
+        const response = await axios.post(process.env.REACT_APP_BACKEND_ADDRESS + '/update-topic', bodyFormData)
+
+        if (response.status == 200) {
+            setAPIResponse(response.data.message)
+        } else {
+            setAPIResponse("Failed to update topic")
+        }
     }
 
-    const publishCourse = () => {
-
-    };
-
-    const publishModule = () => {
-
-    };
-
-    const publishTopic = () => {
-
-    };
+    const handleChange = (event) => {
+        switch (event.target.name) {
+            case "course-name":
+                setCourseName(event.target.value)
+                debounce(function () {
+                    updateCourse("Draft");
+                }, 2000)
+                break
+            case "course-code":
+                setCourseCode(event.target.value)
+                debounce(function () {
+                    updateCourse("Draft");
+                }, 2000)
+                break
+            case "module-name":
+                setModuleName(event.target.value)
+                debounce(function () {
+                    updateModule("Draft");
+                }, 2000)
+                break
+            case "topic-name":
+                setTopicName(event.target.value)
+                debounce(function () {
+                    updateTopic("Draft");
+                }, 2000)
+                break
+            case "description":
+                setDescription(event.target.value)
+                debounce(function () {
+                    updateTopic("Draft");
+                }, 2000)
+                break
+        }
+    }
 
     return (
-        <div className={classes.root}>
-            <Grid container className={classes.gridStyle} spacing={2}>
-                {boxType == "Course" ?
-                    <>
-                        <Grid item xs={12} className={classes.paper}>
-                            <TextField id="outlined-basic" label="Course Name" value={courseName} />
-                            <TextField id="outlined-basic" label="Course Code" value={courseCode} />
-                        </Grid>
-                        <Grid item xs={12} className={classes.paper}>
-                            <Button id="publish-button" variant="contained" color="primary" onClick={() => publishCourse()}>Publish Course</Button>
-                        </Grid>
-                    </>
-                    :
-                    (boxType == "Module" ?
+        <div className="popup-box">
+            <div className="box">
+                <span className="close-icon" onClick={props.handleClose}>x</span>
+                <Grid container className={classes.gridStyle} spacing={2}>
+                    {boxType == "Course" ?
                         <>
                             <Grid item xs={12} className={classes.paper}>
-                                <TextField id="outlined-basic" label="Module Name" variant="outlined" value={moduleName} />
+                                <TextField id="outlined-basic" label="Course Name" variant="outlined" name="course-name" onChange={handleChange} value={courseName} />
+                                <TextField id="outlined-basic" label="Course Code" variant="outlined" name="course-code" onChange={handleChange} value={courseCode} />
                             </Grid>
                             <Grid item xs={12} className={classes.paper}>
-                                <Button id="publish-button" variant="contained" color="primary" onClick={() => publishModule()}>Publish Module</Button>
+                                <Button id="publish-button" variant="contained" color="primary" onClick={() => updateCourse("Published")}>Publish Course</Button>
                             </Grid>
                         </>
                         :
-                        <>
-                            <Grid item xs={12} className={classes.paper}>
-                                <TextField id="outlined-basic" label="Topic Name" variant="outlined" value={topicName}/>
-                                <TextField id="outlined-basic" label="Description" variant="outlined"  value={description}/>
-                            </Grid>
-                            <Grid item xs={12} className={classes.paper}>
-                                <Button id="publish-button" variant="contained" color="primary" onClick={() => publishTopic()}>Publish Topic</Button>
-                            </Grid>
-                        </>
-                    )}
-            </Grid>
+                        (boxType == "Module" ?
+                            <>
+                                <Grid item xs={12} className={classes.paper}>
+                                    <TextField id="outlined-basic" label="Module Name" variant="outlined" name="module-name" onChange={handleChange} value={moduleName} />
+                                </Grid>
+                                <Grid item xs={12} className={classes.paper}>
+                                    <Button id="publish-button" variant="contained" color="primary" onClick={() => updateModule("Published")}>Publish Module</Button>
+                                </Grid>
+                            </>
+                            :
+                            <>
+                                <Grid item xs={12} className={classes.paper}>
+                                    <TextField id="outlined-basic" label="Topic Name" variant="outlined" name="topic-name" onChange={handleChange} value={topicName} />
+                                    <TextField id="outlined-basic" label="Description" variant="outlined" name="description" onChange={handleChange} value={description} />
+                                </Grid>
+                                <Grid item xs={12} className={classes.paper}>
+                                    <Button id="publish-button" variant="contained" color="primary" onClick={() => updateTopic("Published")}>Publish Topic</Button>
+                                </Grid>
+                            </>
+                        )}
+                    {apiResponse}
+                </Grid>
+            </div>
         </div>
     );
 }
