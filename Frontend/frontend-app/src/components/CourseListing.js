@@ -63,6 +63,7 @@ function CourseListing() {
     }
 
     const handleClickEditCourse = async (course) => {
+        await getModulesByCourse(course.id)
         togglePopup()
         setClickedCourse(course)
         const draftVersion = await axios.get(process.env.REACT_APP_BACKEND_ADDRESS + 'get-draft-if-any', {
@@ -84,7 +85,6 @@ function CourseListing() {
                 code: ''
             })
         }
-        await getModulesByCourse(course.id)
     }
 
     const handleClickDeleteCourse = async (course) => {

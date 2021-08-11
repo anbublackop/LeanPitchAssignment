@@ -37,32 +37,6 @@ function ModuleListing(props) {
 
     const [apiResponse, setAPIResponse] = React.useState('');
 
-    const getModulesByCourse = async (id) => {
-        var result = await axios.get(process.env.REACT_APP_BACKEND_ADDRESS + 'get-modules-by-course', {
-            params: {
-                course_id: id
-            }
-        })
-        if (result && result.data && result.data.list_of_modules) {
-            result.data.list_of_modules.forEach(module => {
-                const draftVersion = getDraftVersion(result.data.list_of_modules, module.id)
-                if (Object.keys(draftVersion).length)
-                    module.draft_version = getDraftVersion(result.data.list_of_modules, module.id)[0].name
-            })
-            setModules(result.data.list_of_modules)
-        }
-        return result.data.list_modules
-    }
-
-    const getDraftVersion = (list_of_modules, module_id) => {
-        const draft = list_of_modules.filter((module) => {
-            if (module.published_id == module_id) {
-                return module.name
-            }
-        })
-        return draft
-    }
-
     const handleClickDeleteModule = async (module) => {
         const response = await axios.delete(process.env.REACT_APP_BACKEND_ADDRESS + 'delete-entity', {
             params: {
@@ -90,8 +64,6 @@ function ModuleListing(props) {
         // old_name: getNamefromModuleID
         // new_name: modules object is updated with new name. get name from module.name
         // state: state 
-        
-        const result = await getModulesByCourse(clickedCourse.id)
         
         var bodyFormData = new FormData();
         bodyFormData.append('name', courseModules[index].name)
