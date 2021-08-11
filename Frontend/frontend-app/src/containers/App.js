@@ -6,7 +6,7 @@ import {
     Switch,
     Route
 } from "react-router-dom";
-import Listing from '../components/Listing';
+import CourseListing from '../components/CourseListing';
 
 function App() {
     return (
@@ -14,7 +14,7 @@ function App() {
             <div className="App">
                 <Switch>
                     <Route exact path="/">
-                        <Listing />
+                        <CourseListing />
                     </Route>
                 </Switch>
             </div>

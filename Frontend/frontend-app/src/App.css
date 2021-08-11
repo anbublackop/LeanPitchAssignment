@@ -58,7 +58,7 @@
   border-radius: 20px;
   padding: 50px;
   border: 1px solid #999;
-  overflow: auto;
+  overflow: scroll;
 }
  
 .close-icon {

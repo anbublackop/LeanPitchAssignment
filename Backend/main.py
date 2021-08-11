@@ -253,10 +253,9 @@ def getCourses():
     return build_actual_response(jsonify(list_of_courses=[e.serialize() for e in courses]))
 
 @app.route('/get-modules-by-course', methods=['GET'])
-def getModulesByCourseName():
-    course_name = request.args.get('course_name')
-    course = Course.query.filter_by(name=course_name).first()
-    modules = Module.query.filter_by(course_id=course.id, state="Published").all()
+def getModulesByCourseId():
+    course_id = request.args.get('course_id')
+    modules = Module.query.filter_by(course_id=course_id).all()
     return build_actual_response(jsonify(list_of_modules=[e.serialize() for e in modules]))
 
 @app.route('/get-topics-by-module', methods=['GET'])
