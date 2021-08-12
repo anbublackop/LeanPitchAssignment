@@ -29,7 +29,7 @@ class Trainer(db.Model):
 
 class Course(db.Model):
     id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(100), unique = True)
+    name = db.Column(db.String(100))
     code = db.Column(db.String(100), unique = True)
     state = db.Column(db.String(20))
     publishedId = db.Column(db.Integer)
@@ -51,7 +51,7 @@ class Course(db.Model):
 
 class Module(db.Model):
     id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(100), unique = True)
+    name = db.Column(db.String(100))
     course_id = db.Column(db.Integer, db.ForeignKey('course.id'))
     state = db.Column(db.String(20))
     publishedId = db.Column(db.Integer)
@@ -160,12 +160,12 @@ def addTopic():
 
 @app.route('/update-course', methods=['OPTIONS','POST'])
 def updateCourse():
-    name = request.values.get('name')
+    course_id = request.values.get('id')
     new_code = request.values.get('new_code')
     new_name = request.values.get('new_name')
     state = request.values.get('state')
     if (state == "Draft"):
-        publishedCourse = Course.query.filter_by(name=name, state="Published").first()
+        publishedCourse = Course.query.filter_by(id=course_id, state="Published").first()
         draftCourse = Course.query.filter_by(publishedId=publishedCourse.id).first()
         if (draftCourse):
             draftCourse.name = new_name
@@ -175,13 +175,11 @@ def updateCourse():
             course = Course(new_name, new_code, state, publishedCourse.id)
             addToDB(course)
     else:
-        course = Course.query.filter_by(name=name, state="Draft").first()
+        course = Course.query.filter_by(publishedId=course_id).first()
         if (course):
-            published_course_id = course.publishedId
             db.session.delete(course)
-            course = Course.query.filter_by(id=published_course_id).first()
-        else:
-            course = Course.query.filter_by(name=name).first()
+            db.session.commit()
+        course = Course.query.filter_by(id=course_id).first()
         course.name = new_name
         course.code = new_code
         course.state = state
@@ -190,12 +188,12 @@ def updateCourse():
     
 @app.route('/update-module', methods=['OPTIONS','POST'])
 def updateModule():
-    name = request.values.get('name')
+    module_id = request.values.get('id')
     new_name = request.values.get('new_name')
     state = request.values.get('state')
-    getModule = Module.query.filter_by(name=name).first()
+    getModule = Module.query.filter_by(id=module_id).first()
     if (state == "Draft"):
-        publishedModule = Module.query.filter_by(name=name, state="Published").first()
+        publishedModule = Module.query.filter_by(id=module_id, state="Published").first()
         draftModule = Module.query.filter_by(publishedId=publishedModule.id).first()
         if (draftModule):
             draftModule.name = new_name
@@ -204,13 +202,11 @@ def updateModule():
             module = Module(new_name, getModule.course_id, state, publishedModule.id)
             addToDB(module)
     else:
-        module = Module.query.filter_by(name=name, state="Draft").first()
+        module = Module.query.filter_by(publishedId=module_id).first()
         if (module):
-            published_module_id = module.publishedId
             db.session.delete(module)
-            module = Module.query.filter_by(id=published_module_id).first()
-        else:
-            module = Module.query.filter_by(name=name).first()
+            db.session.commit() 
+        module = Module.query.filter_by(id=module_id).first()
         module.name = new_name
         module.state = state
         db.session.commit()

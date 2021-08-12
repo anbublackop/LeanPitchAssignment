@@ -66,11 +66,11 @@ function ModuleListing(props) {
         // state: state 
         
         var bodyFormData = new FormData();
-        bodyFormData.append('name', courseModules[index].name)
+        bodyFormData.append('id', courseModules[index].id)
         bodyFormData.append('new_name', module.draft_version);
         bodyFormData.append('state', "Draft");
 
-        const response = await axios.post(process.env.REACT_APP_BACKEND_ADDRESS + '/update-module', bodyFormData)
+        const response = await axios.post(process.env.REACT_APP_BACKEND_ADDRESS + 'update-module', bodyFormData)
 
         if (response.status == 200) {
             setAPIResponse(response.data.message)

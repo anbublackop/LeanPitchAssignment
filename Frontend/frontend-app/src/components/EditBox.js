@@ -54,12 +54,12 @@ function EditBox(props) {
     const updateCourse = async (state) => {
         console.log(props.data.editCourseData.name, props.data.clickedCourse.name)
         var bodyFormData = new FormData();
-        bodyFormData.append('name', props.data.clickedCourse.name)
+        bodyFormData.append('id', props.data.clickedCourse.id)
         bodyFormData.append('new_name', courseName);
         bodyFormData.append('new_code', courseCode);
         bodyFormData.append('state', state);
 
-        const response = await axios.post(process.env.REACT_APP_BACKEND_ADDRESS + '/update-course', bodyFormData)
+        const response = await axios.post(process.env.REACT_APP_BACKEND_ADDRESS + 'update-course', bodyFormData)
 
         if (response.status == 200) {
             setAPIResponse(response.data.message)
