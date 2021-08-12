@@ -21,7 +21,6 @@ class Trainer(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     username = db.Column(db.String(100), unique = True)
     full_name = db.Column(db.String(100))
-    # date_created = db.Column(db.DateTime, default=datetime.now)
  
     def __init__(self, username, full_name):
         self.username = username

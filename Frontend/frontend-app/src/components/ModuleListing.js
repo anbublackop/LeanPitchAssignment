@@ -53,8 +53,9 @@ function ModuleListing(props) {
 
     const handleChange = (event, index) => {
         const updatedModules = Object.assign([], modules)
-        updatedModules[index].draft_version = event.target.value
+        updatedModules[index].draft_version = event.target.value        
         setModules(updatedModules)
+        props.sendData(updatedModules)
     }
 
     const saveAsDraft = async (module, index) => {
@@ -77,8 +78,11 @@ function ModuleListing(props) {
         } else {
             setAPIResponse("Failed to update module")
         }
-
     }
+
+    useEffect(()=>{
+        props.sendData(courseModules)
+    }, [])
 
     return (
         <React.Fragment>
