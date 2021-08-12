@@ -165,8 +165,8 @@ def updateCourse():
     new_name = request.values.get('new_name')
     state = request.values.get('state')
     if (state == "Draft"):
-        draftCourse = Course.query.filter_by(name=name, state=state).first()
-        publishedCourse = Course.query.filter_by(name=name).first()
+        publishedCourse = Course.query.filter_by(name=name, state="Published").first()
+        draftCourse = Course.query.filter_by(publishedId=publishedCourse.id).first()
         if (draftCourse):
             draftCourse.name = new_name
             draftCourse.code = new_code
@@ -195,8 +195,8 @@ def updateModule():
     state = request.values.get('state')
     getModule = Module.query.filter_by(name=name).first()
     if (state == "Draft"):
-        draftModule = Module.query.filter_by(name=name, state=state).first()
-        publishedModule = Module.query.filter_by(name=name).first()
+        publishedModule = Module.query.filter_by(name=name, state="Published").first()
+        draftModule = Module.query.filter_by(publishedId=publishedModule.id).first()
         if (draftModule):
             draftModule.name = new_name
             db.session.commit()
@@ -224,8 +224,8 @@ def updateTopic():
     state = request.values.get('state')
     getTopic = Topic.query.filter_by(name=name).first()
     if (state == "Draft"):
-        draftTopic = Topic.query.filter_by(name=name, state=state).first()
-        publishedTopic = Topic.query.filter_by(name=name).first()
+        publishedTopic = Topic.query.filter_by(name=name, state="Published").first()
+        draftTopic = Topic.query.filter_by(publishedId=publishedTopic.id).first()
         if (draftTopic):
             draftTopic.name = new_name
             draftTopic.description = description

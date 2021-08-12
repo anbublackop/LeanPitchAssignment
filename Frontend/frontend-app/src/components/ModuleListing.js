@@ -52,8 +52,8 @@ function ModuleListing(props) {
     }
 
     const handleChange = (event, index) => {
-        const updatedModules = modules
-        updatedModules[index].name = event.target.value
+        const updatedModules = Object.assign([], modules)
+        updatedModules[index].draft_version = event.target.value
         setModules(updatedModules)
     }
 
@@ -67,7 +67,7 @@ function ModuleListing(props) {
         
         var bodyFormData = new FormData();
         bodyFormData.append('name', courseModules[index].name)
-        bodyFormData.append('new_name', module.name);
+        bodyFormData.append('new_name', module.draft_version);
         bodyFormData.append('state', "Draft");
 
         const response = await axios.post(process.env.REACT_APP_BACKEND_ADDRESS + '/update-module', bodyFormData)

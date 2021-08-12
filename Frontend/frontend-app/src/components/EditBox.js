@@ -52,8 +52,9 @@ function EditBox(props) {
     const [apiResponse, setAPIResponse] = React.useState('');
 
     const updateCourse = async (state) => {
+        console.log(props.data.editCourseData.name, props.data.clickedCourse.name)
         var bodyFormData = new FormData();
-        bodyFormData.append('name', props.data.editCourseData.name || props.data.clickedCourse.name)
+        bodyFormData.append('name', props.data.clickedCourse.name)
         bodyFormData.append('new_name', courseName);
         bodyFormData.append('new_code', courseCode);
         bodyFormData.append('state', state);
@@ -67,21 +68,20 @@ function EditBox(props) {
         }
     }
 
-    const updateModule = async (state) => {
-        var bodyFormData = new FormData();
-        bodyFormData.append('name', props.data.editModuleData.name || props.data.clickedModule.name)
-        bodyFormData.append('new_name', moduleName);
-        bodyFormData.append('state', state);
+    // const updateModule = async (state) => {
+    //     var bodyFormData = new FormData();
+    //     bodyFormData.append('name', props.data.editModuleData.name || props.data.clickedModule.name)
+    //     bodyFormData.append('new_name', moduleName);
+    //     bodyFormData.append('state', state);
 
-        const response = await axios.post(process.env.REACT_APP_BACKEND_ADDRESS + '/update-module', bodyFormData)
+    //     const response = await axios.post(process.env.REACT_APP_BACKEND_ADDRESS + '/update-module', bodyFormData)
 
-        if (response.status == 200) {
-            setAPIResponse(response.data.message)
-        } else {
-            setAPIResponse("Failed to update module")
-        }
-    }
-
+    //     if (response.status == 200) {
+    //         setAPIResponse(response.data.message)
+    //     } else {
+    //         setAPIResponse("Failed to update module")
+    //     }
+    // }
 
     const handleChange = (event) => {
         switch (event.target.name) {
